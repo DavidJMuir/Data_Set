@@ -9,12 +9,15 @@ int main()
   double Median = Numbers.Median(Data, 0);
   double Random_Error = Numbers.Random_Uncertainty(Data, 0);
   double Mode = Numbers.Mode(Data, 0);
-  double Range = Numbers.Range(Data, 0);
+  Data_Set Numbers_Subset = Numbers.Data_Subset(Data, 0, 3, 6);
+  double** Subset = Numbers.Input_Data_Subset(Data, 0, 3.0, 6.0);
   cout << Mean << endl;
   cout << Median << endl;
   cout << Random_Error << endl;
   cout << Mode << endl;
-  cout << Range << endl;
+
+  Mean = Numbers_Subset.Mean(Subset, 0);
+  cout << Mean << endl;
 
   // File input.
 /*
