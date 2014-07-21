@@ -22,6 +22,7 @@ The class can:
 4) calculate the mode of the data set.
 5) calculate the range of the data set. 
 6) calculate the random error/uncertainty in the data set. 
+7) define a subset data set, based on a range of values defined by the user, from the initial input data which can be used within the class. 
 *******************************************************************************/
 
 class Data_Set {
@@ -306,6 +307,56 @@ public:
 	Total_Number_of_Values++;
       }
     return (Maximum_Value - Minimum_Value)/Total_Number_of_Values;
+  }
+
+  // Create a subset of data.
+
+  Data_Set Data_Subset(double** Set_of_Data, int Column_Number, double Lower_Bound, double Upper_Bound)
+  {
+    int Row_Counter = 0, Iterator = 0; 
+
+    for (int Row_Iterator = 0; Row_Iterator < Rows; Row_Iterator++)
+      {
+	if ((Set_of_Data [Column_Number][Row_Iterator] >= Lower_Bound) &&
+	    (Set_of_Data [Column_Number][Row_Iterator] <= Upper_Bound))
+	  {
+	    Row_Counter++;
+	  } 
+      }
+    Data_Set Subset (1, Row_Counter);
+    return Subset;
+  }
+
+  double** Input_Data_Subset(double** Set_of_Data, int Column_Number, double Lower_Bound, double Upper_Bound)
+  {
+    int Row_Counter = 0, Iterator = 0; 
+    
+    for (int Row_Iterator = 0; Row_Iterator < Rows; Row_Iterator++)
+      {
+	if ((Set_of_Data [Column_Number][Row_Iterator] >= Lower_Bound) &&
+	    (Set_of_Data [Column_Number][Row_Iterator] <= Upper_Bound))
+	  {
+	    Row_Counter++;
+	  } 
+      }
+
+    double** Array = Dynamic_Array(1, Row_Counter);
+    double** Data_Subset_Array = Set_Array(Array, 1, Row_Counter, 0);
+
+    for (int Row_Iterator = 0; Row_Iterator < Rows; Row_Iterator++)
+      {
+	if ((Set_of_Data [Column_Number][Row_Iterator] >= Lower_Bound) &&
+	    (Set_of_Data [Column_Number][Row_Iterator] <= Upper_Bound))
+	  {
+	    //cout << "***********" << endl;
+	    //cout << Set_of_Data [Column_Number][Row_Iterator] << endl;
+	    Data_Subset_Array [0][Iterator] = Set_of_Data [Column_Number][Row_Iterator];
+	    cout << "**********" << endl;
+	    cout << Data_Subset_Array [0][Iterator] << endl;
+	    Iterator++;
+	  }
+      }
+    return Data_Subset_Array;
   }
 
   //double All_Analysis() {};
