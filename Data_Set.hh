@@ -2,9 +2,11 @@
 #define DATA_SET_H
 
 #include <iostream>
+#include <stdio.h>
 #include <fstream>
 #include <sstream>
 #include <math.h>
+#include <string>
 
 using namespace std;
 
@@ -31,9 +33,9 @@ private:
 public:
 
   Data_Set() {};
-  Data_Set(int a, int b) : Columns(a), Rows(b) {};
+  Data_Set(int a, int b) : Columns(a + 1), Rows(b) {};
 
-  double** Input_Data_Set(string Input_Type) {
+  double** Input_Data_Set(string Input_Type, const char* Filename) {
     int Iterator = 0;
     double Element_1 = 0, Element_2 = 0, Element_3 = 0, Element_4 = 0;
     double** Data_Array = Dynamic_Array(Columns, Rows);
@@ -46,38 +48,38 @@ public:
 	string Line;
 
 	ifstream Data;
-	Data.open("Data.txt");
+	Data.open(Filename);
 	while (getline(Data, Line))
 	  {
 	    stringstream ss(Line);
-	    if (ss >> Element_1)
+	    if (ss >> Element_1 >> Element_2 >> Element_3 >> Element_4)
 	      {
-		Set_of_Data [0][Iterator] = Element_1;
-		Set_of_Data [1][Iterator] = 0;
-		Iterator++;
-	      }
-	    else if (ss >> Element_1 >> Element_2)
-	      {
-		Set_of_Data [0][Iterator] = Element_1;
-		Set_of_Data [1][Iterator] = Element_2;
-		Set_of_Data [2][Iterator] = 0;
+		Set_of_Data [0][Iterator] = 0;
+		Set_of_Data [1][Iterator] = Element_1;
+		Set_of_Data [2][Iterator] = Element_2;
+		Set_of_Data [3][Iterator] = Element_3;
+		Set_of_Data [4][Iterator] = Element_4;
 		Iterator++;
 	      }
 	    else if (ss >> Element_1 >> Element_2 >> Element_3)
 	      {
-		Set_of_Data [0][Iterator] = Element_1;
-		Set_of_Data [1][Iterator] = Element_2;
-		Set_of_Data [2][Iterator] = Element_3;
-		Set_of_Data [3][Iterator] = 0;
+		Set_of_Data [0][Iterator] = 0;
+		Set_of_Data [1][Iterator] = Element_1;
+		Set_of_Data [2][Iterator] = Element_2;
+		Set_of_Data [3][Iterator] = Element_3;
 		Iterator++;
 	      }
-	    else if (ss >> Element_1 >> Element_2 >> Element_3 >> Element_4)
+	    else if (ss >> Element_1 >> Element_2)
 	      {
-		Set_of_Data [0][Iterator] = Element_1;
-		Set_of_Data [1][Iterator] = Element_2;
-		Set_of_Data [2][Iterator] = Element_3;
-		Set_of_Data [3][Iterator] = Element_4;
-		Set_of_Data [4][Iterator] = 0;
+		Set_of_Data [0][Iterator] = 0;
+		Set_of_Data [1][Iterator] = Element_1;
+		Set_of_Data [2][Iterator] = Element_2;
+		Iterator++;
+	      }
+	    else if (ss >> Element_1)
+	      {
+		Set_of_Data [0][Iterator] = 0;
+		Set_of_Data [1][Iterator] = Element_1;
 		Iterator++;
 	      }
 	    else 
@@ -92,7 +94,7 @@ public:
 	     (Input_Type == "MANUAL"))
       {
 	double Data_Value = 0;
-	for (int Column_Number = 0; Column_Number < (Columns); Column_Number++)
+	for (int Column_Number = 1; Column_Number < (Columns); Column_Number++)
 	  {
 	    for (int Row_Number = 0; Row_Number < Rows; Row_Number++)
 	      {
@@ -118,7 +120,7 @@ public:
 
   double** Dynamic_Array(int Number_of_Columns, int Number_of_Rows) {
     double** Array = new double* [Number_of_Columns];
-    for (int Iterator = 0; Iterator <= Number_of_Columns; Iterator++)
+    for (int Iterator = 0; Iterator < Number_of_Columns; Iterator++)
       {
 	Array [Iterator] = new double [Number_of_Rows];
       }
@@ -126,7 +128,7 @@ public:
   }
 
   double** Set_Array(double** Array, int Number_of_Columns, int Number_of_Rows, double Set_Value) {
-    for (int Column_Iterator = 0; Column_Iterator <= Number_of_Columns; Column_Iterator++)
+    for (int Column_Iterator = 0; Column_Iterator < Number_of_Columns; Column_Iterator++)
       {
 	for (int Row_Iterator = 0; Row_Iterator < Number_of_Rows; Row_Iterator++)
 	  {
@@ -168,9 +170,9 @@ public:
 	  {
 	    Value = Set_of_Data [Column_Number][Row_Iterator];
 	    if ((Value < Minimum_Value) &&
-		(Set_of_Data [Columns][Row_Iterator] == 0))
+		(Set_of_Data [0][Row_Iterator] == 0))
 	      {
-		Ordered_Data_Set [Column_Number][Number_of_Iterations] = Value;
+		Ordered_Data_Set [0][Number_of_Iterations] = Value;
 		Minimum_Value = Value;
 	      }
 	    if (Row_Iterator == (Rows - 1))
@@ -179,9 +181,9 @@ public:
 		  {
 		    Value = Set_of_Data [Column_Number][Iterator];
 		    if ((Value == Minimum_Value) &&
-			(Set_of_Data [Columns][Iterator] == 0))
+			(Set_of_Data [0][Iterator] == 0))
 		      {
-			Set_of_Data [Columns][Iterator] = 1;
+			Set_of_Data [0][Iterator] = 1;
 			break;
 		      }
 		  }
@@ -191,12 +193,17 @@ public:
     if (Rows/2.0 == floor(Rows/2.0))
       {
 	Row_Number = floor(Rows/2);
-	Median_Value = (Ordered_Data_Set [Column_Number][Row_Number - 1] + Ordered_Data_Set [Column_Number][Row_Number])/2.0;
+	Median_Value = (Ordered_Data_Set [0][Row_Number - 1] + Ordered_Data_Set [0][Row_Number])/2.0;
       }
     else
       {
 	Row_Number = floor(Rows/2.0);
-	Median_Value = Ordered_Data_Set [Column_Number][Row_Number];
+	Median_Value = Ordered_Data_Set [0][Row_Number];
+      }
+
+    for (int Row_Iterator = 0; Row_Iterator < Rows; Row_Iterator++)
+      {
+	Set_of_Data [0][Row_Iterator] = 0;
       }
 
     return Median_Value;
@@ -214,20 +221,17 @@ public:
     for (int Row_Iterator = 0; Row_Iterator < Rows; Row_Iterator++)
       {
 	Data_Value = Set_of_Data [Column_Number][Row_Iterator];
-	for (int Iterator = 0; Iterator <= Rows; Iterator++)
+	for (int Iterator = 0; Iterator < Rows; Iterator++) // < Rows
 	  {
-	    cout << "DV = " << Data_Value << endl;
 	    if (Mode_Array [0][Iterator] == Data_Value)
 	    {
 	      Mode_Array [1][Iterator] = Mode_Array [1][Iterator] + 1;
-	      cout << "Yes 1" << endl;
 	    }
-	    else if (Iterator == Rows)
+	    else if (Iterator == (Rows - 1))
 	      {
 		Mode_Array [0][Mode_Array_Iterator] = Data_Value;
 		Mode_Array [1][Mode_Array_Iterator] = Mode_Array [1][Mode_Array_Iterator] + 1;
 		Mode_Array_Iterator++;
-		cout << "Yes 2" << endl;
 	      }
 	  }
       }
@@ -237,13 +241,11 @@ public:
 	  {
 	    Maximum_Recurrence = Mode_Array [1][Iterator];
 	    Mode_Value = Mode_Array [0][Iterator];
-	    cout << "Yes 3" << endl;
 	  }
 	if (Mode_Array [1][Iterator] > Maximum_Recurrence)
 	  {
 	    Maximum_Recurrence = Mode_Array [1][Iterator];
 	    Mode_Value = Mode_Array [0][Iterator];
-	    cout << "Yes 4" << endl;
 	  }
       }
     cout << "The mode value was repeated " << Maximum_Recurrence << " times." << endl;
@@ -310,7 +312,6 @@ public:
   }
 
   // Create a subset of data.
-
   Data_Set Data_Subset(double** Set_of_Data, int Column_Number, double Lower_Bound, double Upper_Bound)
   {
     int Row_Counter = 0, Iterator = 0; 
@@ -327,6 +328,7 @@ public:
     return Subset;
   }
 
+  // Create a subset of data.
   double** Input_Data_Subset(double** Set_of_Data, int Column_Number, double Lower_Bound, double Upper_Bound)
   {
     int Row_Counter = 0, Iterator = 0; 
@@ -340,26 +342,45 @@ public:
 	  } 
       }
 
-    double** Array = Dynamic_Array(1, Row_Counter);
-    double** Data_Subset_Array = Set_Array(Array, 1, Row_Counter, 0);
+    double** Array = Dynamic_Array(2, Row_Counter);
+    double** Data_Subset_Array = Set_Array(Array, 2, Row_Counter, 0);
 
     for (int Row_Iterator = 0; Row_Iterator < Rows; Row_Iterator++)
       {
 	if ((Set_of_Data [Column_Number][Row_Iterator] >= Lower_Bound) &&
 	    (Set_of_Data [Column_Number][Row_Iterator] <= Upper_Bound))
 	  {
-	    //cout << "***********" << endl;
-	    //cout << Set_of_Data [Column_Number][Row_Iterator] << endl;
-	    Data_Subset_Array [0][Iterator] = Set_of_Data [Column_Number][Row_Iterator];
-	    cout << "**********" << endl;
-	    cout << Data_Subset_Array [0][Iterator] << endl;
+	    Data_Subset_Array [1][Iterator] = Set_of_Data [Column_Number][Row_Iterator];
 	    Iterator++;
 	  }
       }
     return Data_Subset_Array;
   }
 
-  //double All_Analysis() {};
+  void All_Analysis(Data_Set Data_Set_Name, double** Set_of_Data, int Column_Number, const char* Filename) {
+    double Mean = 0, Median = 0, Random_Uncertainty = 0, Range = 0;
+
+    ofstream Analysis_File(Filename);
+    if (Analysis_File != NULL)
+      {
+  	Analysis_File << "Title: " << Filename << endl;
+  	Analysis_File << endl;
+
+	Mean = Data_Set_Name.Mean(Set_of_Data, Column_Number);
+	Median = Data_Set_Name.Median(Set_of_Data, Column_Number);
+	Range = Data_Set_Name.Range(Set_of_Data, Column_Number);
+	Random_Uncertainty = Data_Set_Name.Random_Uncertainty(Set_of_Data, Column_Number);
+
+  	Analysis_File << "Mean: " << Mean << endl;
+	Analysis_File << "Median: " << Median << endl;
+	Analysis_File << "Range: " << Range << endl;
+	Analysis_File << "Random Uncertainty: " << Random_Uncertainty << endl;
+      }
+    else
+      {
+  	cout << "ERROR: The file " << Filename << " did not open successfully." << endl;
+      }
+  };
 };
 
 #endif
