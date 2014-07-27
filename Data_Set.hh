@@ -7,6 +7,7 @@
 #include <sstream>
 #include <math.h>
 #include <string>
+#include <time.h>
 
 using namespace std;
 
@@ -17,14 +18,19 @@ This class is used for analysing data sets.
 
 The class can:
 1) intake an arbitrary sized data set.
-   - from a file.
+   - from a file (with an arbitrary name).
    - from the user when the class is used in a program.
 2) calculate the mean of the data set.
 3) calculate the median of the data set.
 4) calculate the mode of the data set.
-5) calculate the range of the data set. 
-6) calculate the random error/uncertainty in the data set. 
-7) define a subset data set, based on a range of values defined by the user, from the initial input data which can be used within the class. 
+5) calculate the range of the data set.
+6) calculate the population variance of the data set.
+7) calculate the population standard deviation of the data set.
+8) calculate the sample variance of the data set.
+9) calculate the sample standard deviation of the data set. 
+10) calculate the random error/uncertainty in the data set. 
+11) define a subset data set, based on a range of values defined by the user, from the initial input data which can be used within the class. 
+12) create a file (with an arbitrary name and file extension) which contains analysis of the data set. The analysis contained within the file is most of the calculated quantities listed above.
 *******************************************************************************/
 
 class Data_Set {
@@ -277,8 +283,47 @@ public:
     return (Maximum_Value - Minimum_Value);
 }
 
-  //double Standard_Deviation() {};
-  //double Standard_Error() {};
+  double Population_Variance(Data_Set Data_Set_Name, double** Set_of_Data, int Column_Number) {
+    double Mean = 0, Data_Value = 0, Difference_Value_Squared = 0, Population_Variance = 0;
+    Mean = Data_Set_Name.Mean(Set_of_Data, Column_Number);
+
+    for (int Iterator = 0; Iterator < Rows; Iterator++)
+      {
+	Data_Value = Set_of_Data [Column_Number][Iterator];
+	Difference_Value_Squared = pow((Data_Value - Mean), 2);
+	Set_of_Data [0][Iterator] = Difference_Value_Squared;
+      }
+
+    Population_Variance = Data_Set_Name.Mean(Set_of_Data, 0);
+
+    for (int Reset_Iterator = 0; Reset_Iterator < Rows; Reset_Iterator++)
+      {
+	Set_of_Data [0][Reset_Iterator] = 0;
+      }
+    return Population_Variance;
+  }
+
+  double Sample_Variance(Data_Set Data_Set_Name, double** Set_of_Data, int Column_Number) {
+    double Population_Variance = 0, Sample_Variance = 0;
+    Population_Variance = Data_Set_Name.Population_Variance(Data_Set_Name, Set_of_Data, Column_Number);
+    Sample_Variance = Population_Variance*(Rows/(Rows - 1.0));
+    return Sample_Variance;
+  }
+
+  double Population_Standard_Deviation(Data_Set Data_Set_Name, double** Set_of_Data, int Column_Number) {
+    double Population_Variance = 0, Population_Standard_Deviation = 0;
+    Population_Variance = Data_Set_Name.Population_Variance(Data_Set_Name, Set_of_Data, Column_Number);
+    Population_Standard_Deviation = sqrt(Population_Variance);
+    return Population_Standard_Deviation;
+  }
+  double Sample_Standard_Deviation(Data_Set Data_Set_Name, double** Set_of_Data, int Column_Number) {
+    double Sample_Variance = 0, Sample_Standard_Deviation = 0;
+    Sample_Variance = Data_Set_Name.Sample_Variance(Data_Set_Name, Set_of_Data, Column_Number);
+    Sample_Standard_Deviation = sqrt(Sample_Variance);
+    return Sample_Standard_Deviation;
+  }
+  
+  // double Standard_Error() {};
   // Other possibilities.
   // chi-squared test
   // Spearmans_Rank
@@ -358,7 +403,7 @@ public:
   }
 
   void All_Analysis(Data_Set Data_Set_Name, double** Set_of_Data, int Column_Number, const char* Filename) {
-    double Mean = 0, Median = 0, Random_Uncertainty = 0, Range = 0;
+    double Mean = 0, Median = 0, Random_Uncertainty = 0, Range = 0, Population_Variance = 0, Population_Standard_Deviation = 0, Sample_Variance = 0, Sample_Standard_Deviation = 0;
 
     ofstream Analysis_File(Filename);
     if (Analysis_File != NULL)
@@ -366,15 +411,31 @@ public:
   	Analysis_File << "Title: " << Filename << endl;
   	Analysis_File << endl;
 
+	time_t Raw_Time;
+	struct tm* Time_Information;
+	time(&Raw_Time);
+	Time_Information = localtime(&Raw_Time);
+	Analysis_File << asctime(Time_Information) << endl;
+
 	Mean = Data_Set_Name.Mean(Set_of_Data, Column_Number);
 	Median = Data_Set_Name.Median(Set_of_Data, Column_Number);
 	Range = Data_Set_Name.Range(Set_of_Data, Column_Number);
 	Random_Uncertainty = Data_Set_Name.Random_Uncertainty(Set_of_Data, Column_Number);
+	Population_Variance = Data_Set_Name.Population_Variance(Data_Set_Name, Set_of_Data, Column_Number);
+	Population_Standard_Deviation = Data_Set_Name.Population_Standard_Deviation(Data_Set_Name, Set_of_Data, Column_Number);
+	Sample_Variance = Data_Set_Name.Sample_Variance(Data_Set_Name, Set_of_Data, Column_Number);
+	Sample_Standard_Deviation = Data_Set_Name.Sample_Standard_Deviation(Data_Set_Name, Set_of_Data, Column_Number);
 
   	Analysis_File << "Mean: " << Mean << endl;
 	Analysis_File << "Median: " << Median << endl;
 	Analysis_File << "Range: " << Range << endl;
+	Analysis_File << "Population Variance: " << Population_Variance << endl;
+	Analysis_File << "Population Standard Deviation: " << Population_Standard_Deviation << endl;
+	Analysis_File << "Sample Variance: " << Sample_Variance << endl;
+	Analysis_File << "Sample Standard Deviation: " << Sample_Standard_Deviation << endl;
 	Analysis_File << "Random Uncertainty: " << Random_Uncertainty << endl;
+
+	Analysis_File.close();
       }
     else
       {
