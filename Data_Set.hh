@@ -3,11 +3,15 @@
 
 #include <iostream>
 #include <stdio.h>
+#include <cmath>
 #include <fstream>
 #include <sstream>
 #include <math.h>
 #include <string>
 #include <time.h>
+#include <iomanip>
+
+#define Column_Spacing 12
 
 using namespace std;
 
@@ -20,17 +24,18 @@ The class can:
 1) intake an arbitrary sized data set.
    - from a file (with an arbitrary name).
    - from the user when the class is used in a program.
-2) calculate the mean of the data set.
-3) calculate the median of the data set.
-4) calculate the mode of the data set.
-5) calculate the range of the data set.
-6) calculate the population variance of the data set.
-7) calculate the population standard deviation of the data set.
-8) calculate the sample variance of the data set.
-9) calculate the sample standard deviation of the data set. 
-10) calculate the random error/uncertainty in the data set. 
-11) define a subset data set, based on a range of values defined by the user, from the initial input data which can be used within the class. 
-12) create a file (with an arbitrary name and file extension) which contains analysis of the data set. The analysis contained within the file is most of the calculated quantities listed above.
+2) calculate the mean of a data set.
+3) calculate the median of a data set.
+4) calculate the mode of a data set.
+5) calculate the range of a data set.
+6) calculate the population variance of a data set.
+7) calculate the population standard deviation of a data set.
+8) calculate the sample variance of a data set.
+9) calculate the sample standard deviation of a data set.
+10) calculate Spearman's rank correlation coefficient of two columns of data in a data set.
+11) calculate the random error/uncertainty in a data set. 
+12) define a subset data set, based on a range of values defined by the user, from the initial input data which can be used within the class. 
+13) create a file (with an arbitrary name and file extension) which contains analysis of a data set. The analysis contained within the file is most of the calculated quantities listed above.
 *******************************************************************************/
 
 class Data_Set {
@@ -144,6 +149,21 @@ public:
     return Array;
   }
 
+  void Output_Dynamic_Array(double** Array, int Number_of_Columns, int Number_of_Rows) {
+    double Entry = 0;
+
+    cout << setw(Column_Spacing);
+    for (int Row_Iterator = 0; Row_Iterator < Number_of_Rows; Row_Iterator++)
+      {
+	for (int Column_Iterator = 0; Column_Iterator < Number_of_Columns; Column_Iterator++)
+	  {
+	    Entry = Array [Column_Iterator][Row_Iterator];
+	    cout << Entry << setw(Column_Spacing);
+	  }
+	cout << endl;
+      }
+  }
+  
   // Calculates the mean of a data set.
   double Mean(double** Set_of_Data, int Column_Number) {
     int Number_of_Values = 0;
@@ -165,7 +185,7 @@ public:
 
     for (int Row_Iterator = 0; Row_Iterator < Rows; Row_Iterator++)
       {
-	Value = Set_of_Data [Column_Number][Row_Iterator];
+	Value = abs(Set_of_Data [Column_Number][Row_Iterator]);
 	Sum += Value;
       }
 
@@ -326,8 +346,216 @@ public:
   // double Standard_Error() {};
   // Other possibilities.
   // chi-squared test
-  // Spearmans_Rank
   // Pearsons_Product_Coefficient.
+
+  double Spearmans_Rank(double** Set_of_Data, int Column_X_i, int Column_Y_i) {
+    double Value = 0, Sum = 0, Minimum_Value = 0, X_i = 0, Y_i = 0, x_i = 0, y_i = 0, Difference = 0, Difference_Squared = 0, Difference_Squared_Sum = 0, Spearman_Correlation_Coefficient = 0, y_Iterator = 0, X_i_Table = 0, Y_i_Table = 0;
+
+    double** Array = Dynamic_Array(6, Rows);
+    double ** Spearmans_Rank_Table = Set_Array(Array, 6, Rows, 0);
+
+    for (int Row_Iterator = 0; Row_Iterator < Rows; Row_Iterator++)
+      {
+	Value = abs(Set_of_Data [Column_X_i][Row_Iterator]);
+	Sum += Value;
+      }
+
+    for (int Number_of_Iterations = 0; Number_of_Iterations < Rows; Number_of_Iterations++)
+      {
+	Minimum_Value = Sum;  
+	for (int Row_Iterator = 0; Row_Iterator < Rows; Row_Iterator++)
+	  {
+	    X_i = Set_of_Data [Column_X_i][Row_Iterator];
+	    Y_i = Set_of_Data [Column_Y_i][Row_Iterator];
+	    if ((X_i < Minimum_Value) &&
+		(Set_of_Data [0][Row_Iterator] == 0))
+	      {
+		Spearmans_Rank_Table [0][Number_of_Iterations] = X_i;
+		Spearmans_Rank_Table [1][Number_of_Iterations] = Y_i;
+		Minimum_Value = X_i;
+	      }
+	    if (Row_Iterator == (Rows - 1))
+	      {
+		for (int Iterator = 0; Iterator < Rows; Iterator++)
+		  {
+		    X_i = Set_of_Data [Column_X_i][Iterator];
+		    if ((X_i == Minimum_Value) &&
+			(Set_of_Data [0][Iterator] == 0))
+		      {
+			Set_of_Data [0][Iterator] = 1;
+			break;
+		      }
+		  }
+	      }
+	  }
+      }
+
+    for (int Row_Iterator = 0; Row_Iterator < Rows; Row_Iterator++)
+      {
+	Set_of_Data [0][Row_Iterator] = 0;
+      }
+    int Repeated_Data_Value_Counter = 1, x_Iterator = 0;
+
+    for (int Row_Iterator = 0; Row_Iterator < Rows; Row_Iterator++)
+      {
+	x_Iterator++;
+	Repeated_Data_Value_Counter = 1;
+	cout << x_Iterator << endl;
+	X_i = Spearmans_Rank_Table [0][Row_Iterator];
+	cout << X_i << endl;
+	if (Spearmans_Rank_Table [2][Row_Iterator] == 0)
+	  {
+	    for (int Repeated_Iterator = (Row_Iterator + 1); Repeated_Iterator < Rows; Repeated_Iterator++)
+	      {
+		if (Spearmans_Rank_Table [0][Repeated_Iterator] == X_i)
+		  {
+		    Repeated_Data_Value_Counter++;
+		  }
+		else
+		  {
+		    break;
+		  }
+	      }
+	    Sum = 0;
+	    cout << Repeated_Data_Value_Counter << endl;
+	    for (int Iterator = x_Iterator; Iterator < (x_Iterator + Repeated_Data_Value_Counter); Iterator++)
+	      {
+		Sum += Iterator;
+	      }
+	    cout << "Sum = " << Sum << endl;
+	    x_i = Sum/Repeated_Data_Value_Counter;
+	    cout << x_i << endl;
+	    for (int Spearmans_Rank_Table_Iterator = Row_Iterator; Spearmans_Rank_Table_Iterator < (Row_Iterator + Repeated_Data_Value_Counter); Spearmans_Rank_Table_Iterator++)
+	      {
+		Spearmans_Rank_Table [2][Spearmans_Rank_Table_Iterator] = x_i;
+	      }
+	  }
+      }
+
+    double** Array_2 = Dynamic_Array(3, Rows);
+    double** Y_i_Ordering_Array = Set_Array(Array_2, 3, Rows, 0);
+
+    for (int Row_Iterator = 0; Row_Iterator < Rows; Row_Iterator++)
+      {
+	Value = Set_of_Data [Column_Y_i][Row_Iterator];
+	Sum += Value;
+	}
+
+    for (int Number_of_Iterations = 0; Number_of_Iterations < Rows; Number_of_Iterations++)
+      {
+	Minimum_Value = Sum;  
+	for (int Row_Iterator = 0; Row_Iterator < Rows; Row_Iterator++)
+	  {
+	    X_i = Set_of_Data [Column_X_i][Row_Iterator];
+	    Y_i = Set_of_Data [Column_Y_i][Row_Iterator];
+	    if ((Y_i < Minimum_Value) &&
+		(Set_of_Data [0][Row_Iterator] == 0))
+	      {
+		Y_i_Ordering_Array [0][Number_of_Iterations] = X_i;
+		Y_i_Ordering_Array [1][Number_of_Iterations] = Y_i;
+		Minimum_Value = Y_i;
+	      }
+	    if (Row_Iterator == (Rows - 1))
+	      {
+		for (int Iterator = 0; Iterator < Rows; Iterator++)
+		  {
+		    Y_i = Set_of_Data [Column_Y_i][Iterator];
+		    if ((Y_i == Minimum_Value) &&
+			(Set_of_Data [0][Iterator] == 0))
+		      {
+			Set_of_Data [0][Iterator] = 1;
+			break;
+		      }
+		  }
+	      }
+	  }
+      }
+
+    for (int Row_Iterator = 0; Row_Iterator < Rows; Row_Iterator++)
+      {
+	Set_of_Data [0][Row_Iterator] = 0;
+      }
+
+    for (int Row_Iterator = 0; Row_Iterator < Rows; Row_Iterator++)
+      {
+	y_Iterator++;
+	Repeated_Data_Value_Counter = 1;
+	cout << y_Iterator << endl;
+	Y_i = Y_i_Ordering_Array [1][Row_Iterator];
+	cout << Y_i << endl;
+	if (Y_i_Ordering_Array [2][Row_Iterator] == 0)
+	  { 
+	    for (int Repeated_Iterator = (Row_Iterator + 1); Repeated_Iterator < Rows; Repeated_Iterator++)
+	      {
+		if (Y_i_Ordering_Array [1][Repeated_Iterator] == Y_i)
+		  {
+		    Repeated_Data_Value_Counter++;
+		  }
+		else
+		  {
+		    break;
+		  }
+	      }
+	    Sum = 0;
+	    cout << Repeated_Data_Value_Counter << endl;
+	    for (int Iterator = y_Iterator; Iterator < (y_Iterator + Repeated_Data_Value_Counter); Iterator++)
+	      {
+		Sum += Iterator;
+	      }
+	    cout << "Sum = " << Sum << endl;
+	    y_i = Sum/Repeated_Data_Value_Counter;
+	    cout << y_i << endl;
+	    for (int Y_i_Ordering_Iterator = Row_Iterator; Y_i_Ordering_Iterator < (Row_Iterator + Repeated_Data_Value_Counter); Y_i_Ordering_Iterator++)
+	      {
+		Y_i_Ordering_Array [2][Y_i_Ordering_Iterator] = y_i;
+	      }
+	  }
+      }
+    
+    for (int y_i_Iterator = 0; y_i_Iterator < Rows; y_i_Iterator++)
+      {
+	X_i = Y_i_Ordering_Array [0][y_i_Iterator];
+	Y_i = Y_i_Ordering_Array [1][y_i_Iterator];
+
+	for (int Spearmans_Rank_Iterator = 0; Spearmans_Rank_Iterator < Rows; Spearmans_Rank_Iterator++)
+	  {
+	    X_i_Table = Spearmans_Rank_Table [0][Spearmans_Rank_Iterator];
+	    Y_i_Table = Spearmans_Rank_Table [1][Spearmans_Rank_Iterator];
+
+	    if((X_i_Table == X_i) &&
+	       (Y_i_Table == Y_i) &&
+	       (Spearmans_Rank_Table [3][Spearmans_Rank_Iterator] == 0))
+	      {
+		Spearmans_Rank_Table [3][Spearmans_Rank_Iterator] = Y_i_Ordering_Array [2][y_i_Iterator];
+	      }
+	  }
+      }
+    
+    for (int Row_Iterator = 0; Row_Iterator < Rows; Row_Iterator++)
+      {
+	x_i = Spearmans_Rank_Table [2][Row_Iterator];
+	y_i = Spearmans_Rank_Table [3][Row_Iterator];
+
+	Difference = (x_i - y_i);
+	Difference_Squared = pow(Difference, 2);
+
+	Spearmans_Rank_Table [4][Row_Iterator] = Difference;
+	Spearmans_Rank_Table [5][Row_Iterator] = Difference_Squared;
+
+	Difference_Squared_Sum += Difference_Squared;
+      }
+
+    Spearman_Correlation_Coefficient = (1.0 - ((6.0*Difference_Squared_Sum)/(Rows*(pow(Rows, 2) - 1.0))));
+
+    cout << "Spearman's Rank Table" << endl;
+    cout << endl;
+    cout << setw(Column_Spacing) << "X_i" << setw(Column_Spacing) << "Y_i" << setw(Column_Spacing) << "x_i" << setw(Column_Spacing) << "y_i" << setw(Column_Spacing) << "d" << setw(Column_Spacing) << "d^2" << endl;
+    cout << "-------------------------------------------------------------------------" << endl; 
+    cout << endl;
+
+    Output_Dynamic_Array(Spearmans_Rank_Table, 6, Rows);
+    return Spearman_Correlation_Coefficient;
+    }
 
   double Random_Uncertainty(double** Set_of_Data, int Column_Number) {
     int Total_Number_of_Values = 0;
