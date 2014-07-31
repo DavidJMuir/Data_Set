@@ -3,11 +3,11 @@
 int main()
 {
   const char* Name;
-
+ 
   /****************************************************************************/
   // Manual input.
   /****************************************************************************/
-
+  /*
   Data_Set Numbers(1, 7);
   double** Data = Numbers.Input_Data_Set("Manual", "Nothing");
   double Mean = Numbers.Mean(Data, 1);
@@ -36,11 +36,11 @@ int main()
 
   Name = "Numbers.txt";
   Numbers.All_Analysis(Numbers, Data, 1, Name);
-  
+  */
   /****************************************************************************/
   // File input.
   /****************************************************************************/
-  
+  /*
   Data_Set Numbers_File(4, 7);
   double** Data_2 = Numbers_File.Input_Data_Set("File", "File_Input.txt");
   Mean = Numbers_File.Mean(Data_2, 4);
@@ -53,8 +53,18 @@ int main()
   cout << "Median: " << Median << endl;
   cout << "Random Uncertainty: " << Random_Error << endl;
   //cout << "Mode: " << Mode << endl;
-
+  */
   // Array input.
 
+  /****************************************************************************/
+  // Spearman's Rank Test
+  /****************************************************************************/
+
+  Data_Set Spearmans_Test(2, 7);
+  double** Spearmans_Array = Spearmans_Test.Input_Data_Set("Manual", "Nothing");
+  double Spearmans_Correlation_Coefficient = Spearmans_Test.Spearmans_Rank(Spearmans_Array, 1, 2);
+
+  cout << "Spearman's Rank" << endl;
+  cout << "Spearman correlation coefficient: " << Spearmans_Correlation_Coefficient << endl;
   return 0;
 }
