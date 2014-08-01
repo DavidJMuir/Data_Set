@@ -396,9 +396,10 @@ public:
       }
     int Repeated_Data_Value_Counter = 1, x_Iterator = 0;
 
+    x_Iterator = Rows + 1;
     for (int Row_Iterator = 0; Row_Iterator < Rows; Row_Iterator++)
       {
-	x_Iterator++;
+	x_Iterator--;
 	Repeated_Data_Value_Counter = 1;
 	cout << x_Iterator << endl;
 	X_i = Spearmans_Rank_Table [0][Row_Iterator];
@@ -475,10 +476,10 @@ public:
       {
 	Set_of_Data [0][Row_Iterator] = 0;
       }
-
+    y_Iterator = Rows + 1;
     for (int Row_Iterator = 0; Row_Iterator < Rows; Row_Iterator++)
       {
-	y_Iterator++;
+	y_Iterator--;
 	Repeated_Data_Value_Counter = 1;
 	cout << y_Iterator << endl;
 	Y_i = Y_i_Ordering_Array [1][Row_Iterator];
@@ -556,6 +557,12 @@ public:
     Output_Dynamic_Array(Spearmans_Rank_Table, 6, Rows);
     return Spearman_Correlation_Coefficient;
     }
+
+  double Spearmans_Rank_Standard_Error() {
+    double Standard_Error = 0;
+    Standard_Error = 0.6325/(pow((Rows - 1.0), 0.5));
+    return Standard_Error;
+  }
 
   double Random_Uncertainty(double** Set_of_Data, int Column_Number) {
     int Total_Number_of_Values = 0;
