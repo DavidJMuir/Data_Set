@@ -476,6 +476,7 @@ public:
       {
 	Set_of_Data [0][Row_Iterator] = 0;
       }
+
     y_Iterator = Rows + 1;
     for (int Row_Iterator = 0; Row_Iterator < Rows; Row_Iterator++)
       {
